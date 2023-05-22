@@ -28,6 +28,23 @@ class Book:
         self.title=title
         self.Publication_year=Publication_year
         self.author=author
+
+class BookAdded:
+    def __init__(self,ISBN,categoryName,title,year,author):
+       
+        self.ISBN=ISBN
+        self.categoryName=categoryName
+        self.title=title
+        self.year=year
+        self.author=author
+
+class BookWithCategory:
+    def __init__(self,ISBN,categoryName,title,year,author):
+        self.ISBN=ISBN
+        self.categoryName=categoryName
+        self.title=title
+        self.year=year
+        self.author=author
         
         
 class Copy:
