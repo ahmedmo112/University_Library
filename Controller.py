@@ -2,6 +2,11 @@ import pyodbc
 import entities
 import datetime
 import random
+
+
+
+logged_in_user = None
+
 def connect_database():
     cnxn_str = ("Driver={SQL Server};"
                 "Server=LAPTOP-SC5IAURS;"
@@ -26,11 +31,12 @@ def get_all_categories():
 
 
 def search_by_category(category_name):
-    cursor.execute(f"SELECT isbn , c.name , title , publicationyear,author  FROM book , category as c WHERE c.categoryid = book.categoryid and c.name like '%{category_name}%'")
+    cursor.execute(f"SELECT bookid, isbn , c.name , title , publicationyear,author  FROM book , category as c WHERE c.categoryid = book.categoryid and c.name like '%{category_name}%'")
     book_List = []
     for row in cursor:
         row_to_list = [elem for elem in row]
-        book = entities.BookWithCategory(row_to_list[0],row_to_list[1],row_to_list[2],row_to_list[3],row_to_list[4])
+        book = entities.BookWithCategory(row_to_list[1],row_to_list[2],row_to_list[3],row_to_list[4],row_to_list[5])
+        book.id = row_to_list[0]
         book_List.append(book)
     return book_List
 
@@ -65,56 +71,60 @@ def update_book(book):
     cursor.commit()
 
 def update_user(user):
-    cursor.execute(f"UPDATE \"USER\" SET firstname = '{user.firstname}', lastname = '{user.lastname}', email = '{user.email}', password = '{user.password}', role = {user.role} WHERE userid = '{user.id}'")
+    cursor.execute(f"UPDATE \"USER\" SET firstname = '{user.firstname}', lastname = '{user.lastname}', email = '{user.email}', password = '{user.password}', role = '{user.role}' WHERE userid = '{user.id}'")
     if user.role == 'STUDENT':
         cursor.execute(f"UPDATE student SET year = '{user.year}' WHERE userid = '{user.id}'")
     cursor.commit()
 
 
 
-def borrow_book(book_id, user_id,book_isbn):
+def borrow_book(book_id,book_isbn):
     start_date = datetime.datetime.now()
-    end = start_date + datetime.timedelta(days=30)
+    end = start_date + datetime.timedelta(days=14)
     current_date = start_date.strftime("%Y-%m-%d")
     end_date = end.strftime("%Y-%m-%d")
-    cursor.execute(f"INSERT INTO borrow (bookid,isbn, userid,borrowdate,returndate) VALUES ('{book_id}','{book_isbn}','{user_id}', '{current_date}', '{end_date}')")
+    cursor.execute(f"INSERT INTO borrow (bookid,isbn, userid,borrowdate,returndate) VALUES ('{book_id}','{book_isbn}','{logged_in_user.id}', '{current_date}', '{end_date}')")
     cursor.commit()
 
 def search_book_by_title(title):
-    cursor.execute(f"SELECT isbn , c.name , title , publicationyear,author  FROM book , category as c WHERE c.categoryid = book.categoryid and title like '%{title}%'")
+    cursor.execute(f"SELECT bookid, isbn , c.name , title , publicationyear,author  FROM book , category as c WHERE c.categoryid = book.categoryid and title like '%{title}%'")
     book_List = []
     for row in cursor:
         row_to_list = [elem for elem in row]
-        book = entities.BookWithCategory(row_to_list[0],row_to_list[1],row_to_list[2],row_to_list[3],row_to_list[4])
+        book = entities.BookWithCategory(row_to_list[1],row_to_list[2],row_to_list[3],row_to_list[4],row_to_list[5])
+        book.id = row_to_list[0]
         book_List.append(book)
 
     return book_List
 
 def search_book_by_author(author):
-    cursor.execute(f"SELECT isbn , c.name , title , publicationyear,author  FROM book , category as c WHERE c.categoryid = book.categoryid and author like '%{author}%'")
+    cursor.execute(f"SELECT bookid, isbn , c.name , title , publicationyear,author  FROM book , category as c WHERE c.categoryid = book.categoryid and author like '%{author}%'")
     book_List = []
     for row in cursor:
         row_to_list = [elem for elem in row]
-        book = entities.BookWithCategory(row_to_list[0],row_to_list[1],row_to_list[2],row_to_list[3],row_to_list[4])
+        book = entities.BookWithCategory(row_to_list[1],row_to_list[2],row_to_list[3],row_to_list[4],row_to_list[5])
+        book.id = row_to_list[0]
         book_List.append(book)
 
     return book_List
 
 def search_book_by_isbn(isbn):
-    cursor.execute(f"SELECT isbn , c.name , title , publicationyear,author  FROM book , category as c WHERE c.categoryid = book.categoryid and isbn like '%{isbn}%'")
+    cursor.execute(f"SELECT bookid, isbn , c.name , title , publicationyear,author  FROM book , category as c WHERE c.categoryid = book.categoryid and isbn like '%{isbn}%'")
     book_List = []
     for row in cursor:
         row_to_list = [elem for elem in row]
-        book = entities.BookWithCategory(row_to_list[0],row_to_list[1],row_to_list[2],row_to_list[3],row_to_list[4])
+        book = entities.BookWithCategory(row_to_list[1],row_to_list[2],row_to_list[3],row_to_list[4],row_to_list[5])
+        book.id = row_to_list[0]
         book_List.append(book)
     return book_List
 
 def search_book_by_publication_year(publication_year):
-    cursor.execute(f"SELECT isbn , c.name , title , publicationyear,author  FROM book , category as c WHERE c.categoryid = book.categoryid and publicationyear like '%{publication_year}%'")
+    cursor.execute(f"SELECT bookid, isbn , c.name , title , publicationyear,author  FROM book , category as c WHERE c.categoryid = book.categoryid and publicationyear like '%{publication_year}%'")
     book_List = []
     for row in cursor:
         row_to_list = [elem for elem in row]
-        book = entities.BookWithCategory(row_to_list[0],row_to_list[1],row_to_list[2],row_to_list[3],row_to_list[4])
+        book = entities.BookWithCategory(row_to_list[1],row_to_list[2],row_to_list[3],row_to_list[4],row_to_list[5])
+        book.id = row_to_list[0]
         book_List.append(book)
 
     return book_List
@@ -165,6 +175,8 @@ def validate_login(email, password):
             row = cursor.fetchone()
             student_to_list = [elem for elem in row]
             user = entities.Student(row_to_list[0], row_to_list[1], row_to_list[2], row_to_list[3], row_to_list[4], row_to_list[5], student_to_list[1])
+        
+        
         return user
         
 
@@ -179,8 +191,8 @@ def add_copy(book_id,book_isbn):
     cursor.commit()
 
 def delete_book(book_id):
-    cursor.execute(f"DELETE FROM copy WHERE bookid = '{book_id}'")
-    cursor.commit()
+    # cursor.execute(f"DELETE FROM copy WHERE bookid = '{book_id}'")
+    # cursor.commit()
     cursor.execute(f"DELETE FROM book WHERE bookid = '{book_id}'")
     cursor.commit()
 
@@ -226,14 +238,15 @@ def count_available_copies(book_id):
     total_copies=get_all_copies(book_id)
     total_borrowed_copies = 0
     total_borrowed_copies=get_all_borrowed_copies(book_id)  
-    return total_copies - total_borrowed_copies
+    return (total_copies - total_borrowed_copies) , total_copies , total_borrowed_copies
 
 def get_all_books():
-    cursor.execute('SELECT isbn , c.name , title , publicationyear,author  FROM book , category as c WHERE c.categoryid = book.categoryid')
+    cursor.execute('SELECT bookid, isbn , c.name , title , publicationyear,author  FROM book , category as c WHERE c.categoryid = book.categoryid')
     book_List = []
     for row in cursor:
         row_to_list = [elem for elem in row]
-        book = entities.BookWithCategory(row_to_list[0],row_to_list[1],row_to_list[2],row_to_list[3],row_to_list[4])
+        book = entities.BookWithCategory(row_to_list[1],row_to_list[2],row_to_list[3],row_to_list[4],row_to_list[5])
+        book.id = row_to_list[0]
         book_List.append(book)
     print(book_List)
     return book_List
@@ -250,6 +263,122 @@ def get_book_to_edit(isbn):
         book = entities.BookWithCategory(row_to_list[1],row_to_list[2],row_to_list[3],row_to_list[4],row_to_list[5])
     
     return book, id
+
+def get_borrowed_books():
+    cursor.execute(f"SELECT b.bookid, b.isbn ,title,c.name , b.borrowdate,b.returndate  FROM book , category as c , borrow as b WHERE c.categoryid = book.categoryid and b.bookid = book.bookid and b.userid = '{logged_in_user.id}'")
+    book_List = []
+    for row in cursor:
+        row_to_list = [elem for elem in row]
+        book = entities.BorrowedBook(row_to_list[0],row_to_list[1],row_to_list[2],row_to_list[3],row_to_list[4],row_to_list[5])
+       
+        book_List.append(book)
+    return book_List
+
+def validate_borrow(isbn):
+    cursor.execute(f"SELECT * FROM borrow WHERE isbn = '{isbn}' AND userid = '{logged_in_user.id}'")
+    row = cursor.fetchone()
+    
+    if not row:
+        return True
+    else:
+        return False
+
+
+
+# def generate_pdf_report():
+#         # Create a new PDF document
+#         c = canvas.Canvas("report.pdf", pagesize=letter)
+
+#         cursor 
+
+       
+#         # groub by category name and count books in each category
+#         cursor.execute("SELECT c.name AS CategoryName, COUNT(b.bookid) AS BookCount FROM category c LEFT JOIN book b ON c.categoryid = b.categoryid GROUP BY c.name ORDER BY c.name")
+#         category_data = cursor.fetchall()
+#           # get most 3 borrowed books from borrow table
+#         cursor.execute("SELECT TOP 3 b.title AS BookTitle, COUNT(b.bookid) AS BorrowCount FROM book b LEFT JOIN borrow br ON b.bookid = br.bookid GROUP BY b.title ORDER BY BorrowCount DESC")
+#         book_data = cursor.fetchall()
+#         # get top 3 users who borrowed most books
+#         cursor.execute("SELECT TOP 3 u.firstname AS FirstName, u.lastname AS LastName, COUNT(b.bookid) AS BorrowCount FROM \"USER\" u LEFT JOIN borrow br ON u.userid = br.userid LEFT JOIN book b ON br.bookid = b.bookid GROUP BY u.firstname, u.lastname ORDER BY BorrowCount DESC")
+#         user_data = cursor.fetchall()
+
+#         # Set initial position for drawing on the PDF
+#         x = 50
+#         y = 750
+
+#         # Add report title
+#         c.setFont("Helvetica-Bold", 16)
+#         c.drawString(x, y, "Library System Report")
+#         y -= 30
+
+#         # Add category details to the PDF
+#         c.setFont("Helvetica", 12)
+#         c.drawString(x, y, "Books of each Categories:")
+#         y -= 20
+
+#         for category in category_data:
+#             category_name = category.CategoryName
+#             book_count = category.BookCount
+
+#             c.drawString(x + 20, y, f"{category_name}: {book_count} books")
+#             y -= 15
+
+#         # Add book details to the PDF
+        
+#         c.drawString(x, y, "Top 3 Borrowed Books:")
+#         y -= 20
+        
+#         for book in book_data:
+#             book_title = book.BookTitle
+#             borrow_count = book.BorrowCount
+
+#             c.drawString(x + 20, y, f"{book_title}: {borrow_count} times")
+#             y -= 15
+
+#         # Add user details to the PDF
+#         c.drawString(x, y, "Top 3 Users who borrowed books:")
+#         y -= 20
+
+#         for user in user_data:
+#             first_name = user.FirstName
+#             last_name = user.LastName
+#             borrow_count = user.BorrowCount
+
+#             c.drawString(x + 20, y, f"{first_name} {last_name}: {borrow_count} books")
+#             y -= 15
+
+
+
+#         # book_data = cursor.fetchall()
+#         # y -= 30
+#         # c.drawString(x, y, "Books in each category:")
+#         # y -= 20
+
+#         # for book in book_data:
+#         #     book_title = book.BookTitle
+#         #     publication_year = book.PublicationYear
+#         #     author = book.Author
+#         #     category_name = book.CategoryName
+
+#         #     c.drawString(x + 20, y, f"{book_title} ({publication_year}) by {author} ({category_name})")
+#         #     y -= 15
+
+
+#         # for category in category_data:
+#         #     category_name = category.CategoryName
+#         #     book_count = category.BookCount
+
+#         #     c.drawString(x + 20, y, f"{category_name}: {book_count} books")
+#         #     y -= 15
+
+      
+#         # Generate a bar chart
+#         chart_data = [(category.CategoryName, category.BookCount) for category in category_data]
+
+    
+#         c.save()
+
+
 
 
 #software id->6

@@ -7,7 +7,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_LoginWindow(QtWidgets.QWidget):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1200, 675)
+        # MainWindow.resize(1200, 675)
+        MainWindow.setFixedSize(1200, 675)
         MainWindow.setMinimumSize(QtCore.QSize(1200, 675))
         MainWindow.setMaximumSize(QtCore.QSize(1200, 675))
         MainWindow.setStyleSheet("QMainWindow{\n"

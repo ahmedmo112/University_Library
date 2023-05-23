@@ -39,6 +39,7 @@ class BookAdded:
         self.author=author
 
 class BookWithCategory:
+    id = None
     def __init__(self,ISBN,categoryName,title,year,author):
         self.ISBN=ISBN
         self.categoryName=categoryName
@@ -60,8 +61,18 @@ class PhoneNumber:
         self.number=number
 
 class Borrow:
-    def __init__(self,userid,copyid,borrowdate,returndate):
+    def __init__(self,userid,bookid,borrowdate,returndate):
         self.userid=userid
         self.borrowdate=borrowdate    
         self.returndate=returndate
-        self.copyid=copyid
+        self.bookid=bookid
+
+class BorrowedBook:
+    def __init__(self,bookid,ISBN,bookName,categoryName,startDate,endDate):
+        self.bookid=bookid
+        self.ISBN=ISBN
+        self.bookName=bookName
+        self.categoryName=categoryName
+        self.startDate=startDate
+        self.endDate=endDate
+       

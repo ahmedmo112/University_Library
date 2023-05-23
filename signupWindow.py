@@ -14,7 +14,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_SignupWindow(QtWidgets.QWidget):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1200, 675)
+        # MainWindow.resize(1200, 675)
+        MainWindow.setFixedSize(1200, 675)
         MainWindow.setStyleSheet("QMainWindow{\n"
 "background-image: url(\"assets/signup_bg.png\");\n"
 "background-position: top left;\n"
